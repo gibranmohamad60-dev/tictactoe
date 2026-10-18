@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Multi-Mode</title>
+    
+    <!-- PWA Manifest Link -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* TEMA WARNA SESUAI MODE */
+        
+        /* 1. LOCAL MODE (Serba Putih Bersih) */
+        body.theme-local {
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .theme-local .card {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .theme-local .cell {
+            background: #f1f3f5;
+            color: #212529;
+            border: 2px solid #ced4da;
+        }
+        .theme-local .cell:hover { background: #e9ecef; }
+        .theme-local .btn { background: #212529; color: #ffffff; }
+
+        /* 2. AI EASY (Serba Hijau) */
+        body.theme-easy {
+            background-color: #061f12;
+            color: #2ecc71;
+        }
+        .theme-easy .card {
+            background: #0b3820;
+            border: 1px solid #2ecc71;
+            box-shadow: 0 0 20px rgba(46, 204, 113, 0.2);
+        }
+        .theme-easy .cell {
+            background: #082917;
+            color: #2ecc71;
+            border: 2px solid #2ecc71;
+        }
+        .theme-easy .cell:hover { background: #114d2c; }
+        .theme-easy .btn { background: #2ecc71; color: #061f12; }
+
+        /* 3. AI NORMAL (Serba Oren) */
+        body.theme-normal {
+            background-color: #2b1704;
+            color: #e67e22;
+        }
+        .theme-normal .card {
+            background: #422407;
+            border: 1px solid #e67e22;
+            box-shadow: 0 0 20px rgba(230, 126, 34, 0.2);
+        }
+        .theme-normal .cell {
+            background: #331c05;
+            color: #e67e22;
+            border: 2px solid #e67e22;
+        }
+        .theme-normal .cell:hover { background: #5a320a; }
+        .theme-normal .btn { background: #e67e22; color: #2b1704; }
+
+        /* 4. AI HARD (Serba Merah) */
+        body.theme-hard {
+            background-color: #2a080c;
+            color: #e74c3c;
+        }
+        .theme-hard .card {
+            background: #420d13;
+            border: 1px solid #e74c3c;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.2);
+        }
+        .theme-hard .cell {
+            background: #330a0f;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+        .theme-hard .cell:hover { background: #5c131b; }
+        .theme-hard .btn { background: #e74c3c; color: #ffffff; }
+
+        /* 5. AI EXTREME (Serba Ungu) */
+        body.theme-extreme {
+            background-color: #1a0933;
+            color: #9b59b6;
+        }
+        .theme-extreme .card {
+            background: #2c0f54;
+            border: 1px solid #9b59b6;
+            box-shadow: 0 0 20px rgba(155, 89, 182, 0.3);
+        }
+        .theme-extreme .cell {
+            background: #210c3d;
+            color: #9b59b6;
+            border: 2px solid #9b59b6;
+        }
+        .theme-extreme .cell:hover { background: #3f1778; }
+        .theme-extreme .btn { background: #9b59b6; color: #ffffff; }
+
+        /* 6. AI NIGHTMARE (Serba Hitam & Putih Gothic/Monokrom) */
+        body.theme-nightmare {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        .theme-nightmare .card {
+            background: #0a0a0a;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+        }
+        .theme-nightmare .cell {
+            background: #121212;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+        }
+        .theme-nightmare .cell:hover { background: #222222; }
+        .theme-nightmare .btn { background: #ffffff; color: #000000; font-weight: 900; }
+
+        /* TAMPILAN UTAMA & LAYOUT */
+        .container {
+            max-width: 420px;
+            width: 100%;
+        }
+
+        .card {
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .select-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid currentColor;
+            background: transparent;
+            color: inherit;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+        }
+
+        select option {
+            background: #222;
+            color: #fff;
+        }
+
+        .status {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 15px 0;
+            min-height: 28px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cell.winner {
+            animation: blink 0.6s infinite alternate;
+        }
+
+        @keyframes blink {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="theme-local">
+
+    <div class="container">
+        <div class="card">
+            <h1>Tic Tac Toe</h1>
+
+            <div class="controls">
+                <div class="select-group">
+                    <label for="gameMode">Mode Game:</label>
+                    <select id="gameMode" onchange="changeMode()">
+                        <option value="local">Local (VS Teman)</option>
+                        <option value="ai">VS AI (Komputer)</option>
+                    </select>
+                </div>
+
+                <div class="select-group" id="difficultyGroup" style="display: none;">
+                    <label for="aiDifficulty">Tingkat Kesulitan:</label>
+                    <select id="aiDifficulty" onchange="changeDifficulty()">
+                        <option value="easy">Easy (Hijau)</option>
+                        <option value="normal">Normal (Oren)</option>
+                        <option value="hard">Hard (Merah)</option>
+                        <option value="extreme">Extreme (Ungu)</option>
+                        <option value="nightmare">Nightmare (Hitam Putih)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="status" id="statusText">Giliran: X</div>
+
+            <div class="board" id="board">
+                <div class="cell" data-index="0"></div>
+                <div class="cell" data-index="1"></div>
+                <div class="cell" data-index="2"></div>
+                <div class="cell" data-index="3"></div>
+                <div class="cell" data-index="4"></div>
+                <div class="cell" data-index="5"></div>
+                <div class="cell" data-index="6"></div>
+                <div class="cell" data-index="7"></div>
+                <div class="cell" data-index="8"></div>
+            </div>
+
+            <button class="btn" onclick="resetGame()">Riset Ulang</button>
+        </div>
+    </div>
+
+    <script>
+        const cells = document.querySelectorAll('.cell');
+        const statusText = document.getElementById('statusText');
+        const gameModeSelect = document.getElementById('gameMode');
+        const aiDifficultySelect = document.getElementById('aiDifficulty');
+        const difficultyGroup = document.getElementById('difficultyGroup');
+
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let currentPlayer = "X";
+        let isGameActive = true;
+        let gameMode = "local"; 
+        let aiDifficulty = "easy";
+
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+
+        function changeMode() {
+            gameMode = gameModeSelect.value;
+            if (gameMode === "ai") {
+                difficultyGroup.style.display = "flex";
+                updateTheme(aiDifficultySelect.value);
+            } else {
+                difficultyGroup.style.display = "none";
+                updateTheme("local");
+            }
+            resetGame();
+        }
+
+        function changeDifficulty() {
+            aiDifficulty = aiDifficultySelect.value;
+            updateTheme(aiDifficulty);
+            resetGame();
+        }
+
+        function updateTheme(theme) {
+            document.body.className = "theme-" + theme;
+        }
+
+        function handleCellClick(e) {
+            const index = e.target.getAttribute('data-index');
+
+            if (board[index] !== "" || !isGameActive) return;
+
+            makeMove(index, currentPlayer);
+
+            if (isGameActive && gameMode === "ai" && currentPlayer === "O") {
+                setTimeout(makeAIMove, 400);
+            }
+        }
+
+        function makeMove(index, player) {
+            board[index] = player;
+            cells[index].textContent = player;
+
+            if (checkWin(player)) {
+                statusText.textContent = `Pemain ${player} Menang! 🎉`;
+                isGameActive = false;
+                highlightWin(player);
+                return;
+            }
+
+            if (board.every(cell => cell !== "")) {
+                statusText.textContent = "Permainan Seri! 🤝";
+                isGameActive = false;
+                return;
+            }
+
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            statusText.textContent = `Giliran: ${currentPlayer}`;
+        }
+
+        function highlightWin(player) {
+            winPatterns.forEach(pattern => {
+                const [a, b, c] = pattern;
+                if (board[a] === player && board[b] === player && board[c] === player) {
+                    cells[a].classList.add('winner');
+                    cells[b].classList.add('winner');
+                    cells[c].classList.add('winner');
+                }
+            });
+        }
+
+        function makeAIMove() {
+            if (!isGameActive) return;
+            let move;
+
+            if (aiDifficulty === "easy") {
+                move = getRandomMove();
+            } else if (aiDifficulty === "normal") {
+                move = Math.random() < 0.5 ? getBestMove() : getRandomMove();
+            } else if (aiDifficulty === "hard") {
+                move = Math.random() < 0.8 ? getBestMove() : getRandomMove();
+            } else if (aiDifficulty === "extreme" || aiDifficulty === "nightmare") {
+                move = getBestMove();
+            }
+
+            if (move !== undefined && move !== null) {
+                makeMove(move, "O");
+            }
+        }
+
+        function getRandomMove() {
+            let available = board.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
+            return available[Math.floor(Math.random() * available.length)];
+        }
+
+        function getBestMove() {
+            let bestScore = -Infinity;
+            let move;
+
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === "") {
+                    board[i] = "O";
+                    let score = minimax(board, 0, false);
+                    board[i] = "";
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+            return move;
+        }
+
+        function minimax(newBoard, depth, isMaximizing) {
+            if (checkWinCondition(newBoard, "O")) return 10 - depth;
+            if (checkWinCondition(newBoard, "X")) return depth - 10;
+            if (newBoard.every(cell => cell !== "")) return 0;
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (newBoard[i] === "") {
+                        newBoard[i] = "O";
+                        let score = minimax(newBoard, depth + 1, false);
+                        newBoard[i] = "";
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (newBoard[i] === "") {
+                        newBoard[i] = "X";
+                        let score = minimax(newBoard, depth + 1, true);
+                        newBoard[i] = "";
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWin(player) {
+            return checkWinCondition(board, player);
+        }
+
+        function checkWinCondition(b, player) {
+            return winPatterns.some(pattern => {
+                return pattern.every(index => b[index] === player);
+            });
+        }
+
+        function resetGame() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            currentPlayer = "X";
+            isGameActive = true;
+            statusText.textContent = "Giliran: X";
+            cells.forEach(cell => {
+                cell.textContent = "";
+                cell.classList.remove('winner');
+            });
+        }
+    </script>
+
+    <!-- Service Worker Registration for PWA -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
+</body>
+</html>
